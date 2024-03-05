@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <title>地图显示</title>
+    <style>
+        html,
+        body,
+        #container {
+          width: 100%;
+          height: 100%;
+          margin:0;
+          font-family:"微软雅黑";
+        }
+        #allmap{width:100%;height:500px;}
+		#r-result{width:100%;margin-top:5px;}
+		p{margin:5px; font-size:14px;}
+    </style>
+
+</head>
+<body>
+      <div id="container"></div>
+      <div id="r-result">
+    		<input type="button" onclick="add_control();" value="添加" />
+		    <input type="button" onclick="delete_control();" value="删除" />
+
+      </div>
+	<p>在地图的左上、右上分别展示完整、缩略样式的缩放平移控件；同时在地图的左上方展示比例尺控件，点击按钮查看效果</p>
+</body>
+</html>
+</div>
+<!-- 加载地图JSAPI脚本 -->
+<script type="text/javascript" src="qwebchannel.js"></script>
+<script src="http://api.map.baidu.com/api?v=2.0&ak=1mUGik8WUNEo3sXP94tvQA4FnTb6yyaQ"></script>
+<script>
+       var map = new BMap.Map("container");    // 创建Map实例
+
+       map.centerAndZoom(new BMap.Point(106.614392,29.539772), 15);
+       map.enableScrollWheelZoom(true);
+
+
+
+
+
+
+
+
+
+       var output="s,";
+       var searchComplete = function (results){
+
+       var plan = results.getPlan(0);
+
+		ways_l=plan.getRoute(0).getPath()
+		for(var i=0;i<ways_l.length;i++){
+		output += ways_l[i].lng.toString()+","+ways_l[i].lat.toString()+",";
+		}
+		output+="\n";
+		             //获取距离
+	}
+	var qi="-1,";
+	var qidian = function (results){
+
+       var plan = results.getPlan(0);
+
+		ways_l=plan.getRoute(0).getPath()
+
+		qi += ways_l[0].lng.toString()+","+ways_l[0].lat.toString()+",";
+
+
+		             //获取距离
+	}
+
+    new QWebChannel(qt.webChannelTransport, function (channel) {
+                // 获取qt中绑定的交互对象
+                window.pyjs = channel.objects.interact_obj
+
+                // js 绑定qt中的信号
+                pyjs.sig_send_to_js.connect(function (st) {
+                    output="1,";
+                    qi="-1,";
+                    map.clearOverlays();
+
+                    var ss=st.split(',')
+                    if(ss[0]=="0"){
+                    for(var i=1;i<ss.length-101;i++){
+                    var new_point = new BMap.Point(ss[i],ss[i+1]);
+                    var new_point1 = new BMap.Point(ss[i+100],ss[i+101]);//;map.clearOverlays()加下面，则不会画在地图上
+                    //output="c"+String(i)+",";
+                    //s="s,"+output
+                    var transit = new BMap.WalkingRoute(new_point, {renderOptions: {map: map},onSearchComplete: searchComplete, onPolylinesSet:function(){pyjs.receive_str_from_js(output)}  });
+                	transit.disableAutoViewport();
+                	transit.search(new_point, new_point1);
+                	i++;
+
+                	}}
+                	 if(ss[0]=="-1"){
+                    for(var i=1;i<ss.length-1;i++){
+                    var new_point = new BMap.Point(ss[i],ss[i+1]);
+                    var new_point1 = new BMap.Point(ss[i],ss[i+1]);//;map.clearOverlays()加下面，则不会画在地图上
+                    var transit = new BMap.WalkingRoute(new_point, {renderOptions: {map: map},onSearchComplete: qidian, onPolylinesSet:function(){pyjs.receive_str_from_js(qi)}  });
+                	transit.search(new_point, new_point1);
+                	transit.disableAutoViewport();
+                	i++;
+
+                	}
+
+
+
+
+                	}
+                	if (st=="shuaxin"){
+                	pyjs.receive_str_from_js("shuaxin")
+                	}
+
+
+                	if(ss[0]=="1"){
+
+
+
+                    for (var i=1;i<ss.length-1-25;i++){
+                    var new_point = new BMap.Point(ss[i],ss[i+1]);
+                    i++;
+                    var marker = new BMap.Marker(new_point);  // 创建标注
+        			map.addOverlay(marker);              // 将标注添加到地图中
+        			}
+        			for (var i=101;i<ss.length;i++){
+        			var new_point = new BMap.Point(ss[i],ss[i+1]);
+        			i++;
+        			var vectorMarker = new BMap.Marker(new_point, {
+  // 指定Marker的icon属性为Symbol
+  icon: new BMap.Symbol(BMap_Symbol_SHAPE_POINT, {
+    scale: 1,//图标缩放大小
+    fillColor: "green",//填充颜色
+    fillOpacity: 0.5//填充透明度
+  })
+});
+
+
+        			map.addOverlay(vectorMarker);
+        			}
+                   }
+                });
+           });
+
+    var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});// 左上角，添加比例尺
+	var top_left_navigation = new BMap.NavigationControl();  //左上角，添加默认缩放平移控件
+	var top_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}); //右上角，仅包含平移和缩放按钮
+	/*缩放控件type有四种类型:
+	BMAP_NAVIGATION_CONTROL_SMALL：仅包含平移和缩放按钮；BMAP_NAVIGATION_CONTROL_PAN:仅包含平移按钮；BMAP_NAVIGATION_CONTROL_ZOOM：仅包含缩放按钮*/
+
+	//添加控件和比例尺
+	function add_control(){
+		map.addControl(top_left_control);
+		map.addControl(top_left_navigation);
+		map.addControl(top_right_navigation);
+	}
+	//移除控件和比例尺
+	function delete_control(){
+		map.removeControl(top_left_control);
+		map.removeControl(top_left_navigation);
+		map.removeControl(top_right_navigation);
+	}
+
+	//鼠标点击显示坐标
+    map.addEventListener("click",function(e){
+		alert(e.point.lng + "," + e.point.lat);
+	});
+
+</script>
