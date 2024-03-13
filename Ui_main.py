@@ -6,9 +6,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QPixmap,QPalette,QFont
 import sys
 
+###################### 常量定义 ############
 text_length_s = 80
 text_width_s = 40
-button_length_s = 40
+button_length_s = 80
 button_width_s = 20
 
 label_car_start_postion_len = 0
@@ -76,8 +77,8 @@ class Ui_MainWindow(object):
         
         self.pushButton3 = QtWidgets.QPushButton(MainWindow)
         self.pushButton3.setGeometry(QtCore.QRect(text_length_s, text_width_s, button_length_s,button_width_s))
-        self.pushButton3.setObjectName("pushButton3")        
-        
+        self.pushButton3.setObjectName("pushButton3")   
+                
         #创建一个名为webview的QWebEngineView对象
         self.webview = QWebEngineView(self.centralwidget)
         self.webview.setObjectName("webview")
@@ -144,6 +145,12 @@ class Ui_MainWindow(object):
         self.label_current_position.setObjectName("choice3")
         # 设置标签的文本为“当前位置”
         self.label_current_position.setText("推荐3:")
+        
+####################################################################################
+        # 创建一个名为resultTextEdit的QTextEdit对象，并将其添加到gridLayout中
+        self.resultTextEdit = QtWidgets.QTextEdit(MainWindow)
+        self.resultTextEdit.setObjectName("resultTextEdit")
+        self.gridLayout.addWidget(self.resultTextEdit, 3, 0, 1, 2)
 ##################根据当前的语言环境翻译界面上的文本################
     def retranslateUi(self, MainWindow):
         #创建一个名为_translate的函数，接受一个字符串参数并返回其翻译后的字符串

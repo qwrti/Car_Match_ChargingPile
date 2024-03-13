@@ -49,7 +49,7 @@ def coo(x, x2, xx, xx2):
     # print(right)
     return right
 
-#################  重点修改的部分 ##################
+##  重点修改的部分 
 def find_shortest_path_simple(p1, p2, v):  # 寻找某点到V最短距离
     #p1保存了所有起点的经度，p2保存了所有起点的纬度
     #v "0,2"等位置保存经度，“1，3”等位置保存维度
@@ -65,6 +65,7 @@ def find_shortest_path_simple(p1, p2, v):  # 寻找某点到V最短距离
     return res, num
 
 ############ start_longitude是起点经度，start_latitude是起点维度，起点只有一个；destinaiton是数组，destinaiton[单数]是终点经度，destinaiton[单数+1]是该终点对应的纬度
+###返回离终点的距离，充电桩编号
 def Dijsra(start_longitude,start_latitude,destination): #图论分析法
     pass
 
@@ -114,7 +115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.last_p = []
         text = self.textEdit.toPlainText()
         print (text)
-        self.gps_qidian = []
+        self.gps_startdian = []
         self.car_c = np.ones([Car_Num], dtype=np.uint8) * (-1)
         ##################### post定义了充电桩的位置 ###########################
         self.post = '106.615559,29.538386,106.612811,29.535215,106.61803,29.536547,106.612397,29.546053,106.615704,29.537384,106.611434,29.535636,106.612279,29.538397,106.610106,29.533026,106.613436,29.540303,106.616361,29.535254,106.618242,29.532338,106.609128,29.540774,106.610177,29.535436'
@@ -128,15 +129,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.index = (os.path.split(os.path.realpath(__file__))[0]) + "/index.html"
         self.webview.load(QUrl.fromLocalFile(self.index))
         self.init_channel()
-        self.qi = np.array([106.614248, 29.53727]) + (np.random.rand(Car_Num, 2) - 0.5) / 100  ## ‘50’限制产生的起点数量。‘106.614248, 29.53727’限制起点的位置
-        self.qi0 = list(map(str, self.qi.reshape(1, -1).tolist()))   ## 讲qi转换成传给index.html的文件
+        self.start = np.array([106.614248, 29.53727]) + (np.random.rand(Car_Num, 2) - 0.5) / 100  ## ‘50’限制产生的起点数量。‘106.614248, 29.53727’限制起点的位置
+        self.start0 = list(map(str, self.start.reshape(1, -1).tolist()))   ## 讲start转换成传给index.html的文件
         self.noword = 0
 
     # =============================================================================
-    #         print(self.qi0[0][1:-1])
+    #         print(self.start0[0][1:-1])
     # =============================================================================
     # =============================================================================
-    #         self.interact_obj.sig_send_to_js.emit('-1,'+self.qi0[0][1:-1])
+    #         self.interact_obj.sig_send_to_js.emit('-1,'+self.start0[0][1:-1])
     # =============================================================================
     def init_channel(self):
 
@@ -160,20 +161,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ############## data=-1的时候，是在做初始化 ################
         if data[0] == '-' and data.count(',') == 101:  ## 一个逗号表示一对坐标，共计50个起点
             self.interact_obj.sig_send_to_js.emit(data[1:])  # 第一次定位”1，“
-            self.gps_qi = data[1:].split(',')[1:-1]  # data数据将其加到gps_qi
-            self.gps_zhong = list(map(float, self.gps_qi))  # 转为浮点数
-            self.gps_qidian = self.gps_zhong.copy()  # gps_qidian为gps_zhong异名同体
-            # print(self.gps_zhong)
+            self.gps_start = data[1:].split(',')[1:-1]  # data数据将其加到gps_start
+            self.gps_destination = list(map(float, self.gps_start))  # 转为浮点数
+            self.gps_startdian = self.gps_destination.copy()  # gps_startdian为gps_destination异名同体
+            # print(self.gps_destination)
 
-            for i in range(len(self.gps_zhong)):
-                self.gps_zhong[i] += (np.random.rand() - 0.5) / 500 + gai() * 0.001  # 随机化按规则范围随机化gps_zhong
-            # print(len(self.gps_zhong), self.gps_zhong)
-            self.gps_zhong1 = list(map(str, self.gps_zhong))  # gps_zhong1为字符串类型
-            self.gps_zhong0 = ",".join(self.gps_zhong1)  # 在gps_zhong1中间加入，为gps_zhong0
+            for i in range(len(self.gps_destination)):
+                self.gps_destination[i] += (np.random.rand() - 0.5) / 500 + gai() * 0.001  # 随机化按规则范围随机化gps_destination
+            # print(len(self.gps_destination), self.gps_destination)
+            self.gps_destination1 = list(map(str, self.gps_destination))  # gps_destination1为字符串类型
+            self.gps_destination0 = ",".join(self.gps_destination1)  # 在gps_destination1中间加入，为gps_destination0
 
-            self.qizhong = "0," + data[3:] + self.gps_zhong0  # qizhong为0，+data[3:]（起点）+ self.gps_zhong0（终点）
+            self.startdestination = "0," + data[3:] + self.gps_destination0  # startdestination为0，+data[3:]（起点）+ self.gps_destination0（终点）
 
-            self.interact_obj.sig_send_to_js.emit(self.qizhong)
+            self.interact_obj.sig_send_to_js.emit(self.startdestination)
             self.noword += 1
             
 ################# 对车进行判断 #############
@@ -182,18 +183,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #
             # =============================================================================
 
-            self.gps_qi = self.gps_now.split(',')[1:-1]
+            self.gps_start = self.gps_now.split(',')[1:-1]
             self.power_change = [False] * Car_Num
 
-            self.gps_zhong = list(map(float, self.gps_qi))  # gps_zhong化为浮点数
-            self.gps_qidian = self.gps_zhong.copy()  # gps_qidian为gps_zhong异名同体
+            self.gps_destination = list(map(float, self.gps_start))  # gps_destination化为浮点数
+            self.gps_startdian = self.gps_destination.copy()  # gps_startdian为gps_destination异名同体
             # =============================================================================
-            #             print('this is gps_zhong')
-            #             print(self.gps_zhong)
-            #             print('this is gps_zhong........................\n')
+            #             print('this is gps_destination')
+            #             print(self.gps_destination)
+            #             print('this is gps_destination........................\n')
             # =============================================================================
 
-            # self.gps_zhong_copy=self.gps_zhong.copy()
+            # self.gps_destination_copy=self.gps_destination.copy()
             # =============================================================================
             #             print(self.gps_now)
             # =============================================================================
@@ -202,51 +203,51 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if self.car_c[i] != -1:
                     self.car_c[i] = -1
 
-            for i in range(len(self.gps_zhong)):
-                self.gps_zhong[i] += (np.random.rand() - 0.6) / 300 + gai() * 0.002   ## 车有电的时候，就随机找一个终点
+            for i in range(len(self.gps_destination)):
+                self.gps_destination[i] += (np.random.rand() - 0.6) / 300 + gai() * 0.002   ## 车有电的时候，就随机找一个终点
 
-            # print(self.gps_zhong)
+            # print(self.gps_destination)
             ######### 车没电的时候，就找一个最近的充电桩 #############
             for i in np.where(self.power <= 0.2)[0]:
                 #### 表示没充好电，就保持目的地为上一个循环中保存的充电桩位置 ####
                 if self.car_c[i] != -1:
-                    self.gps_zhong[2 * i] = self.post_[self.car_c[i]]
-                    self.gps_zhong[2 * i + 1] = self.post_[self.car_c[i] + 1]
+                    self.gps_destination[2 * i] = self.post_[self.car_c[i]]
+                    self.gps_destination[2 * i + 1] = self.post_[self.car_c[i] + 1]
 
                     # print("car_c[i] != -1")
                 if self.car_c[i] == -1:  # -1表示“否”
                     # print(self.post_num)
-                    _, num = find_shortest_path_simple(self.gps_qidian[2 * i], self.gps_qidian[2 * i + 1],
+                    _, num = find_shortest_path_simple(self.gps_startdian[2 * i], self.gps_startdian[2 * i + 1],
                                     self.post_)  # 找到需要到的点, **有删改   num表示充电桩的编号  
                     self.car_c[i] = num  # 把充电桩的编号给数组，保存车辆的目的地
                     # self.post_num[num] = 0
                     # self.post_num[num + 1] = 0
-                    self.gps_zhong[2 * i] = self.post_[num]
-                    self.gps_zhong[2 * i + 1] = self.post_[num + 1]
+                    self.gps_destination[2 * i] = self.post_[num]
+                    self.gps_destination[2 * i + 1] = self.post_[num + 1]
 
 
 
 
-            # print((np.array(ces)-np.array(self.gps_zhong),))
+            # print((np.array(ces)-np.array(self.gps_destination),))
 
-            self.gps_zhong1 = list(map(str, self.gps_zhong))
-            # 应该对的起点是self.qidian ,self.zhong
+            self.gps_destination1 = list(map(str, self.gps_destination))
+            # 应该对的起点是self.startdian ,self.destination
             # 返回的路径
             # =============================================================================
-            #             print(self.gps_zhong1)
+            #             print(self.gps_destination1)
             # =============================================================================
-            self.gps_zhong0 = ",".join(self.gps_zhong1)
+            self.gps_destination0 = ",".join(self.gps_destination1)
             # =============================================================================
             #             print('这是终点')
-            #             print(self.gps_zhong1)
+            #             print(self.gps_destination1)
             # =============================================================================
             ###########  “0，”表示要显示路径 ##############
-            self.qizhong = "0," + self.gps_now[2:] + self.gps_zhong0
+            self.startdestination = "0," + self.gps_now[2:] + self.gps_destination0
             # =============================================================================
-            #             print(self.qizhong)
+            #             print(self.startdestination)
             # =============================================================================
 
-            self.interact_obj.sig_send_to_js.emit(self.qizhong)
+            self.interact_obj.sig_send_to_js.emit(self.startdestination)
 ############## data=1是在画完路径后data里面保存了路径（一堆点连成了一条线）。 #############
         if data[0:2] == "1," and data.count('\n') == 50:
 
@@ -264,15 +265,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.l /= 50
             self.l = int(self.l)  # l为均长
             # print(self.l)
-            cuoqi = []
-            cuozhong = []
+            cuostart = []
+            cuodestination = []
             self.last = []
             for i in range(len(self.route_p)):
-                cuoqi.append(float(self.route_p[i][0]))  ## 保存了经度坐标
+                cuostart.append(float(self.route_p[i][0]))  ## 保存了经度坐标
 
             for i in range(len(self.route_p)):
-                cuozhong.append(float(self.route_p[i][-2]))  ## 保存了最后一个点的经度坐标
-            right = coo(cuoqi, cuozhong, self.gps_qidian[::2], self.gps_zhong[::2])
+                cuodestination.append(float(self.route_p[i][-2]))  ## 保存了最后一个点的经度坐标
+            right = coo(cuostart, cuodestination, self.gps_startdian[::2], self.gps_destination[::2])
 
             print('电量：：：：：')
             print(self.power)
@@ -320,8 +321,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if self.point[i] == None:
                     self.point[i] = []
                     for j in range(d):
-                        self.point[i].append(str(self.gps_qidian[2 * i]))
-                        self.point[i].append(str(self.gps_qidian[2 * i + 1]))
+                        self.point[i].append(str(self.gps_startdian[2 * i]))
+                        self.point[i].append(str(self.gps_startdian[2 * i + 1]))
             self.timer = QTimer(self)  # 初始化一个定时器
 
             if self.time < d:  # self.l:
@@ -330,15 +331,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             if d <= self.time:
                 self.timer.stop()
-                self.gps_qi = self.gps_now.split(',')[1:-1]
-                self.gps_zhong = list(map(float, self.gps_qi))
-                for i in range(len(self.gps_zhong)):
-                    self.gps_zhong[i] += (np.random.rand() - 0.5) / 300 + gai() * 0.002
-                self.gps_zhong = list(map(str, self.gps_zhong))
-                self.gps_zhong0 = ",".join(self.gps_zhong)
-                self.qizhong = "0," + data[3:] + self.gps_zhong0
+                self.gps_start = self.gps_now.split(',')[1:-1]
+                self.gps_destination = list(map(float, self.gps_start))
+                for i in range(len(self.gps_destination)):
+                    self.gps_destination[i] += (np.random.rand() - 0.5) / 300 + gai() * 0.002
+                self.gps_destination = list(map(str, self.gps_destination))
+                self.gps_destination0 = ",".join(self.gps_destination)
+                self.startdestination = "0," + data[3:] + self.gps_destination0
 
-                self.interact_obj.sig_send_to_js.emit(self.qizhong)
+                self.interact_obj.sig_send_to_js.emit(self.startdestination)
 
     def run(self):
         self.gps_now = '1,'
@@ -364,7 +365,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
        
         if LAB == 1:
             ## 刚跑程序时，初始化起点##
-            self.interact_obj.sig_send_to_js.emit('-1,' + str(self.qi0[0][1:-1]))
+            self.interact_obj.sig_send_to_js.emit('-1,' + str(self.start0[0][1:-1]))
         else:
             return
 
