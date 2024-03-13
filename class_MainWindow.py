@@ -112,7 +112,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.count = Cycle_Index
         self.last_p = []
-        text = self.textEdit_2.toPlainText()
+        text = self.textEdit.toPlainText()
         print (text)
         self.gps_qidian = []
         self.car_c = np.ones([Car_Num], dtype=np.uint8) * (-1)
@@ -372,7 +372,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def on_pushButton2_clicked(self):
         global LAB
         LAB = 1
-        text = self.textEdit_2.toPlainText()
+        text = self.textEdit.toPlainText()
         global speed
         if (text.isdigit() and int(text) > 1):
             speed = int(text)
