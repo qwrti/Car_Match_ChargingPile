@@ -80,5 +80,3 @@ class Ui_MainWindow(object):
         self.pushButton.setText(_translate("MainWindow", "联网并开始导航"))
         #设置第二个按钮，名为“确定”
         self.pushButton2.setText(_translate("MainWindow", "传入输入数据"))
-        
-        self.pushButton3.setText(_translate("MainWindow", "查看最近充电桩信息"))

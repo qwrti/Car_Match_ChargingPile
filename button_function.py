@@ -1,3 +1,4 @@
+'''
 from PyQt5.QtCore import pyqtSlot
 from class_MainWindow import MainWindow
 ## 定义网页界面中每个按钮所对应的功能
@@ -28,6 +29,7 @@ def run():  ## ref 变 class
     @pyqtSlot()
     ##  '同步到Web'按钮
     def on_pushButton_clicked():  #回调函数、解耦
+        print("#####")
         # 这个信号是在js中和一个js方法绑定的,所以发射这个信号时会执行对应的js方法.
         self.interact_obj.sig_send_to_js.emit('-1,' + str(self.qi0[0][1:-1]))
         # self.textBrowser.clear()  # 调试程序，用来清除文本框
@@ -39,3 +41,4 @@ def run():  ## ref 变 class
         text = self.textEdit_2.toPlainText()
         global speed
         speed = int(text)
+'''
